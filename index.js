@@ -138,12 +138,21 @@ commander.addCommand(new Command({
 commander.addCommand(new Command({
   name: 'list',
   description: 'list the available tracks',
-  action: (msg) => {
-    msg.channel.send(messageFormatter.getBaseMessage({title: true, description: true})
+  action: async (msg, trackName) => {
+    const trackUrls = tracksManager.getUrls();
+    if (trackName in trackUrls) {
+      msg.channel.send(messageFormatter.getBaseMessage().addField(`Tracks for ${trackName}`, (await Promise.all(trackUrls[trackName]
+        .map(async (url, i) => `${i+1} - ${await getTrackTitle(url)}`)))
+        .join('\n')));
+    }
+    else {
+      msg.channel.send(messageFormatter.getBaseMessage({title: true, description: true})
       .addField('List of tracks', `\n${Object.entries(tracksManager.getUrls())
         .map(([key, value]) => `${key} (${value.length})`)
         .join('\n')}`));
+    }
   },
+  argHelp: '[<track-name>]',
   aliases: ['ls']
 }));
 
