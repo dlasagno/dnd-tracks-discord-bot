@@ -5,7 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "nodemon"
+    "dev": "nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dlasagno/dnd-tracks-discord-bot.git"
   },
   "author": "Lasagno Daniele",
   "license": "MIT",
