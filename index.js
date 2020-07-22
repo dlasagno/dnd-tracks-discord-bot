@@ -27,6 +27,15 @@ client.on('message', msg => {
 });
 
 
+async function getTrackTitle(url, linked = true) {
+  if (linked) {
+    return `[${(await ytdl.getBasicInfo(url)).videoDetails.title}](${url})`;
+  }
+  else {
+    return `${(await ytdl.getBasicInfo(url)).videoDetails.title}`;
+  }
+}
+
 async function playTrack(channel, url) {
   currentConnection = await channel.join();
 
@@ -39,7 +48,7 @@ async function playTrack(channel, url) {
 commander.addCommand(new Command({
   name: 'add',
   description: 'adds the specified track to the list',
-  action: (msg, name, url) => {
+  action: async (msg, name, url) => {
     const trackUrls = tracksManager.getUrls();
     if (!(name in trackUrls)) {
       trackUrls[name] = [];
@@ -47,7 +56,7 @@ commander.addCommand(new Command({
     trackUrls[name].push(url);
     tracksManager.saveUrls(trackUrls);
 
-    msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `\`${url}\` added to ${name}`));
+    msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `${await getTrackTitle(url)} added to ${name}`));
   },
   argHelp: '<track-name> <url>',
   aliases: ['a']
@@ -58,18 +67,31 @@ commander.addCommand(new Command({
   description: 'removes the specified track from the list',
   action: async (msg, name, index) => {
     const trackUrls = tracksManager.getUrls();
-    if (!(name in trackUrls)) return;
-    if (!index) {
-      msg.channel.send(messageFormatter.getBaseMessage().addField('Missing index: use one of those', (await Promise.all(trackUrls[name]
-        .map(async (url, i) => `${i+1} - ${(await ytdl.getBasicInfo(url)).videoDetails.title}`)))
-        .join('\n')));
-        return;
-    }
-    trackUrls[name] = trackUrls[name].filter((url, i) => i != Number(index));
-    if (trackUrls[name].length === 0) trackUrls[name] = undefined;
-    tracksManager.saveUrls(trackUrls);
+    let removedUrl;
 
-    msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `Track ${index} removed from ${name}`));
+    if (name in trackUrls) {
+      if (!index) {
+        msg.channel.send(messageFormatter.getBaseMessage().addField('Missing index: use one of those', (await Promise.all(trackUrls[name]
+          .map(async (url, i) => `${i+1} - ${await getTrackTitle(url)}`)))
+          .join('\n')));
+        return;
+      }
+
+      trackUrls[name] = trackUrls[name].filter((url, i) => {
+        if (i != Number(index)) return true;
+        removedUrl = url
+        return false;
+      });
+      if (trackUrls[name].length === 0) trackUrls[name] = undefined;
+      tracksManager.saveUrls(trackUrls);
+    }
+
+    if (removedUrl) {
+      msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${name}`));
+    }
+    else {
+      msg.channel.send(messageFormatter.error('Couldn\'t find the specified track'))
+    }
   },
   argHelp: '<track-name> <index>',
   aliases: ['r']
@@ -78,12 +100,12 @@ commander.addCommand(new Command({
 commander.addCommand(new Command({
   name: 'play',
   description: 'play the specified track',
-  action: (msg, trackName, index) => {
+  action: async (msg, trackName, index) => {
     const trackUrls = tracksManager.getUrls();
     if (trackName in trackUrls && (index ? index : 0) < trackUrls[trackName].length) {
       const trackUrl = trackUrls[trackName][index ? index : Math.floor(Math.random() * Math.floor(trackUrls[trackName].length))];
       playTrack(msg.member.voice.channel, trackUrl);
-      ytdl.getBasicInfo(trackUrl).then( info => msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', info.videoDetails.title)) );
+      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', await getTrackTitle(trackUrl)));
     }
     else {
       msg.channel.send(messageFormatter.error('Couldn\'t find the specified track!'));
