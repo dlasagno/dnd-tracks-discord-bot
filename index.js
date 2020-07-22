@@ -17,7 +17,6 @@ let currentConnection = null;
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
   client.user.setActivity('d.help');
-  //client.user.setAvatar('https://www.lcps.org/cms/lib/VA01000195/Centricity/Domain/29342/DnD%20logo.jpg');
 });
 
 client.on('message', msg => {
