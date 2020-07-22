@@ -21,6 +21,7 @@ client.on('ready', () => {
 
 client.on('message', msg => {
   if (commander.isCommand(msg.content)) {
+    console.log(`Received command: ${msg.content}`);
     commander.execute(msg);
   }
 });
@@ -38,6 +39,7 @@ async function getTrackTitle(url, linked = true) {
 async function playTrack(channel, url) {
   currentConnection = await channel.join();
 
+  console.log(`Joined voice channel: ${currentConnection.channel.name}`);
   const dispatcher = currentConnection.play(ytdl(url, {
     filter: 'audioonly'
   }));
@@ -49,12 +51,14 @@ commander.addCommand(new Command({
   description: 'adds the specified track to the list',
   action: async (msg, name, url) => {
     const trackUrls = tracksManager.getUrls();
+
     if (!(name in trackUrls)) {
       trackUrls[name] = [];
     }
     trackUrls[name].push(url);
     tracksManager.saveUrls(trackUrls);
 
+    console.log(`Added ${url} to ${name}`);
     msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `${await getTrackTitle(url)} added to ${name}`));
   },
   argHelp: '<track-name> <url>',
@@ -86,6 +90,7 @@ commander.addCommand(new Command({
     }
 
     if (removedUrl) {
+      console.log(`Removed ${removedUrl} from ${name}`);
       msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${name}`));
     }
     else {
@@ -101,10 +106,14 @@ commander.addCommand(new Command({
   description: 'play the specified track',
   action: async (msg, trackName, index) => {
     const trackUrls = tracksManager.getUrls();
-    if (trackName in trackUrls && (index ? index : 0) < trackUrls[trackName].length) {
-      const trackUrl = trackUrls[trackName][index ? index : Math.floor(Math.random() * Math.floor(trackUrls[trackName].length))];
+    if (index == undefined) index = Math.floor(Math.random() * Math.floor(trackUrls[trackName].length));
+
+    if (trackName in trackUrls && index >= 0 && index < trackUrls[trackName].length) {
+      const trackUrl = trackUrls[trackName][index];
       playTrack(msg.member.voice.channel, trackUrl);
-      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', await getTrackTitle(trackUrl)));
+
+      console.log(`Playing: ${index} - ${trackUrl} of ${trackName}`);
+      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(trackUrl)}`));
     }
     else {
       msg.channel.send(messageFormatter.error('Couldn\'t find the specified track!'));
@@ -120,6 +129,7 @@ commander.addCommand(new Command({
   action: () => {
     if (currentConnection) {
       currentConnection.dispatcher.pause();
+      console.log('Paused track');
     }
   }
 }));
@@ -130,6 +140,7 @@ commander.addCommand(new Command({
   action: () => {
     if (currentConnection) {
       currentConnection.dispatcher.resume();
+      console.log('Resumed track');
     }
   }
 }));
@@ -161,6 +172,8 @@ commander.addCommand(new Command({
   action: () => {
     if (currentConnection) {
       currentConnection.disconnect();
+      
+      console.log(`Left voice channel: ${currentConnection.channel.name}`);
       currentConnection = null;
     }
   },
