@@ -159,6 +159,7 @@ commander.addCommand(new Command({
       msg.channel.send(messageFormatter.getBaseMessage()
       .addField('List of tracks', `\n${Object.entries(tracksManager.getUrls())
         .map(([key, value]) => `${key} (${value.length})`)
+        .sort()
         .join('\n')}`));
     }
   },
