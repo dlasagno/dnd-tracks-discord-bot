@@ -1,21 +1,58 @@
 {
+    "battle": [
+        "https://www.youtube.com/watch?v=lAGm9MTyRJ8"
+    ],
+    "battle_boss": [
+        "https://www.youtube.com/watch?v=JYFU_RiefKk"
+    ],
     "cave": [
         "https://www.youtube.com/watch?v=qMSDjUjM_q0",
         "https://www.youtube.com/watch?v=E72yDpAfrgY",
         "https://www.youtube.com/watch?v=kxqJuc1HHbg"
     ],
-    "travel": [
-        "https://www.youtube.com/watch?v=A8qMyBWZNw0"
+    "dungeon": [
+        "https://www.youtube.com/watch?v=wScEFaoqwPM",
+        "https://www.youtube.com/watch?v=WPpVMmTt74Q"
     ],
-    "town": [
-        "https://www.youtube.com/watch?v=xu2pESvXcmM"
+    "forest": [
+        "https://www.youtube.com/watch?v=6Em9tLXbhfo"
+    ],
+    "forest_night": [
+        "https://www.youtube.com/watch?v=3TNK916Pjto",
+        "https://www.youtube.com/watch?v=7KFoj-SOfHs"
+    ],
+    "mountain": [
+        "https://www.youtube.com/watch?v=tRXiKBpiN7E"
+    ],
+    "rain": [
+        "https://www.youtube.com/watch?v=dd4D8tZPfKE"
+    ],
+    "sewer": [
+        "https://www.youtube.com/watch?v=9QZ_2wKbb5o"
+    ],
+    "ship": [
+        "https://www.youtube.com/watch?v=D4juEBifIMk",
+        "https://www.youtube.com/watch?v=Lyt7enNpwvk"
+    ],
+    "ship_storm": [
+        "https://www.youtube.com/watch?v=f43ANvCEltQ"
+    ],
+    "storm": [
+        "https://www.youtube.com/watch?v=gVKEM4K8J8A"
     ],
     "tavern": [
-        "https://www.youtube.com/watch?v=fIuO3RpMvHg"
+        "https://www.youtube.com/watch?v=fIuO3RpMvHg",
+        "https://www.youtube.com/watch?v=tNZXDUZu2To"
     ],
-    "banana": [
-        "https://www.youtube.com/watch?v=qMSDjUjM_q0",
-        "https://www.youtube.com/watch?v=E72yDpAfrgY",
-        "https://www.youtube.com/watch?v=kxqJuc1HHbg"
+    "town": [
+        "https://www.youtube.com/watch?v=xu2pESvXcmM",
+        "https://www.youtube.com/watch?v=19dx6AkC_GY"
+    ],
+    "travel": [
+        "https://www.youtube.com/watch?v=A8qMyBWZNw0",
+        "https://www.youtube.com/watch?v=xWtfo9kuRTU"
+    ],
+    "war": [
+        "https://www.youtube.com/watch?v=JYFU_RiefKk"
     ]
 }
