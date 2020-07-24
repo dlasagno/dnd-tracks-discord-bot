@@ -93,7 +93,7 @@ commander.addCommand(new Command({
     }
 
     if (removedUrl) {
-      console.log(`Removed ${chalk.blue(url)} from ${chalk.magenta(trackName)}`);
+      console.log(`Removed ${chalk.blue(removedUrl)} from ${chalk.magenta(trackName)}`);
       msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${trackName}`));
     }
     else {
