@@ -2,6 +2,7 @@ require('dotenv').config();
 
 const Discord = require('discord.js');
 const ytdl = require('ytdl-core');
+const chalk = require('chalk');
 
 const tracksManager = require('./src/tracks-manager');
 const messageFormatter = require('./src/message-formatter');
@@ -15,7 +16,7 @@ let currentConnection = null;
 
 
 client.on('ready', () => {
-  console.log(`Logged in as \x1b[35m${client.user.tag}\x1b[0m!`);
+  console.log(`Logged in as ${chalk.magenta(client.user.tag)}!`);
   
   client.user.setActivity('d.help');
 });
@@ -23,7 +24,7 @@ client.on('ready', () => {
 client.on('message', msg => {
   if (commander.isCommand(msg.content)) {
     console.log();
-    console.log(`\x1b[36m${new Date().toLocaleTimeString()}\x1b[0m - Received command from \x1b[35m${msg.author.tag}\x1b[0m: ${msg.content}`);
+    console.log(`${chalk.cyan(new Date().toLocaleTimeString())} - Received command from ${chalk.magenta(msg.author.tag)}: ${msg.content}`);
 
     commander.execute(msg);
   }
@@ -40,7 +41,7 @@ async function getTrackTitle(url, linked = true) {
 async function playTrack(channel, url) {
   currentConnection = await channel.join();
 
-  console.log(`Joined voice channel: \x1b[35m${currentConnection.channel.name}\x1b[0m`);
+  console.log(`Joined voice channel: ${chalk.magenta(currentConnection.channel.name)}`);
 
   currentConnection.play(ytdl(url, {
     filter: 'audioonly'
@@ -59,7 +60,7 @@ commander.addCommand(new Command({
     trackUrls[trackName].push(url);
     tracksManager.saveUrls(trackUrls);
 
-    console.log(`Added \x1b[34m${url}\x1b[0m to \x1b[35m${trackName}\x1b[0m`);
+    console.log(`Added ${chalk.blue(url)} to ${chalk.magenta(trackName)}`);
     msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `${await getTrackTitle(url)} added to ${trackName}`));
   },
   argHelp: '<track-name> <url>',
@@ -92,7 +93,7 @@ commander.addCommand(new Command({
     }
 
     if (removedUrl) {
-      console.log(`Removed \x1b[34m${removedUrl}\x1b[0m from \x1b[35m${trackName}\x1b[0m`);
+      console.log(`Removed ${chalk.blue(url)} from ${chalk.magenta(trackName)}`);
       msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${trackName}`));
     }
     else {
@@ -119,7 +120,7 @@ commander.addCommand(new Command({
       const url = trackUrls[trackName][index];
       playTrack(msg.member.voice.channel, url);
 
-      console.log(`Playing: ${index} - \x1b[34m${url}\x1b[0m of \x1b[35m${trackName}\x1b[0m`);
+      console.log(`Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`);
       msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(url)}`));
     }
     else {
@@ -185,7 +186,7 @@ commander.addCommand(new Command({
     if (currentConnection) {
       currentConnection.disconnect();
       
-      console.log(`Left voice channel: \x1b[34m${currentConnection.channel.name}\x1b[0m`);
+      console.log(`Left voice channel: ${chalk.magenta(currentConnection.channel.name)}`);
       currentConnection = null;
     }
   },
