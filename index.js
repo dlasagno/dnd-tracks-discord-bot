@@ -16,15 +16,18 @@ let currentConnection = null;
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
+  console.log();
 
   client.user.setActivity('d.help');
 });
 
 client.on('message', msg => {
   if (commander.isCommand(msg.content)) {
-    console.log(`Received command: ${msg.content}`);
+    console.log(`${new Date().toLocaleTimeString()} - Received command from ${msg.author.tag}: ${msg.content}`);
 
     commander.execute(msg);
+
+    console.log();
   }
 });
 
