@@ -1,6 +1,6 @@
 {
   "name": "dnd-tracks-discord-bot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A discord bot to play dnd tracks while playing",
   "main": "index.js",
   "scripts": {
