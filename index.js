@@ -15,19 +15,17 @@ let currentConnection = null;
 
 
 client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-  console.log();
-
+  console.log(`Logged in as \x1b[35m${client.user.tag}\x1b[0m!`);
+  
   client.user.setActivity('d.help');
 });
 
 client.on('message', msg => {
   if (commander.isCommand(msg.content)) {
-    console.log(`${new Date().toLocaleTimeString()} - Received command from ${msg.author.tag}: ${msg.content}`);
+    console.log();
+    console.log(`\x1b[36m${new Date().toLocaleTimeString()}\x1b[0m - Received command from \x1b[35m${msg.author.tag}\x1b[0m: ${msg.content}`);
 
     commander.execute(msg);
-
-    console.log();
   }
 });
 
@@ -42,7 +40,7 @@ async function getTrackTitle(url, linked = true) {
 async function playTrack(channel, url) {
   currentConnection = await channel.join();
 
-  console.log(`Joined voice channel: ${currentConnection.channel.name}`);
+  console.log(`Joined voice channel: \x1b[35m${currentConnection.channel.name}\x1b[0m`);
 
   currentConnection.play(ytdl(url, {
     filter: 'audioonly'
@@ -61,7 +59,7 @@ commander.addCommand(new Command({
     trackUrls[trackName].push(url);
     tracksManager.saveUrls(trackUrls);
 
-    console.log(`Added ${url} to ${trackName}`);
+    console.log(`Added \x1b[34m${url}\x1b[0m to \x1b[35m${trackName}\x1b[0m`);
     msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `${await getTrackTitle(url)} added to ${trackName}`));
   },
   argHelp: '<track-name> <url>',
@@ -94,7 +92,7 @@ commander.addCommand(new Command({
     }
 
     if (removedUrl) {
-      console.log(`Removed ${removedUrl} from ${trackName}`);
+      console.log(`Removed \x1b[34m${removedUrl}\x1b[0m from \x1b[35m${trackName}\x1b[0m`);
       msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${trackName}`));
     }
     else {
@@ -110,13 +108,13 @@ commander.addCommand(new Command({
   description: 'play the specified track',
   action: async (msg, trackName, index) => {
     const trackUrls = tracksManager.getUrls();
+    
     if (index == undefined) index = Math.floor(Math.random() * Math.floor(trackUrls[trackName].length));
-
     if (trackName in trackUrls && index >= 0 && index < trackUrls[trackName].length) {
       const url = trackUrls[trackName][index];
       playTrack(msg.member.voice.channel, url);
 
-      console.log(`Playing: ${index} - ${url} of ${trackName}`);
+      console.log(`Playing: ${index} - \x1b[34m${url}\x1b[0m of \x1b[35m${trackName}\x1b[0m`);
       msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(url)}`));
     }
     else {
@@ -182,7 +180,7 @@ commander.addCommand(new Command({
     if (currentConnection) {
       currentConnection.disconnect();
       
-      console.log(`Left voice channel: ${currentConnection.channel.name}`);
+      console.log(`Left voice channel: \x1b[34m${currentConnection.channel.name}\x1b[0m`);
       currentConnection = null;
     }
   },
