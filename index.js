@@ -108,7 +108,12 @@ commander.addCommand(new Command({
   description: 'play the specified track',
   action: async (msg, trackName, index) => {
     const trackUrls = tracksManager.getUrls();
-    
+
+    if (!trackName) {
+      msg.channel.send(messageFormatter.error('No track was specified!'));
+      return;
+    }
+
     if (index == undefined) index = Math.floor(Math.random() * Math.floor(trackUrls[trackName].length));
     if (trackName in trackUrls && index >= 0 && index < trackUrls[trackName].length) {
       const url = trackUrls[trackName][index];
