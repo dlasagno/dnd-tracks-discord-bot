@@ -157,7 +157,7 @@ commander.addCommand(new Command({
     if (trackName in trackUrls) {
       msg.channel.send(messageFormatter.getBaseMessage()
         .addField(`Tracks for ${trackName}`, (await Promise.all(trackUrls[trackName]
-          .map(async (url, i) => `${i+1} - ${await getTrackTitle(url)}`)))
+          .map(async (url, i) => `${i} - ${await getTrackTitle(url)}`)))
           .join('\n')));
     }
     else {
