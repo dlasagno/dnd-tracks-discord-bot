@@ -16,31 +16,32 @@ let currentConnection = null;
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
+
   client.user.setActivity('d.help');
 });
 
 client.on('message', msg => {
   if (commander.isCommand(msg.content)) {
     console.log(`Received command: ${msg.content}`);
+
     commander.execute(msg);
   }
 });
 
 
 async function getTrackTitle(url, linked = true) {
-  if (linked) {
-    return `[${(await ytdl.getBasicInfo(url)).videoDetails.title}](${url})`;
-  }
-  else {
-    return `${(await ytdl.getBasicInfo(url)).videoDetails.title}`;
-  }
+  let trackTitle = (await ytdl.getBasicInfo(url)).videoDetails.title;
+  if (linked) trackTitle = `[${trackTitle}](${url})`;
+  
+  return trackTitle;
 }
 
 async function playTrack(channel, url) {
   currentConnection = await channel.join();
 
   console.log(`Joined voice channel: ${currentConnection.channel.name}`);
-  const dispatcher = currentConnection.play(ytdl(url, {
+
+  currentConnection.play(ytdl(url, {
     filter: 'audioonly'
   }));
 }
@@ -49,17 +50,16 @@ async function playTrack(channel, url) {
 commander.addCommand(new Command({
   name: 'add',
   description: 'adds the specified track to the list',
-  action: async (msg, name, url) => {
+  action: async (msg, trackName, url) => {
     const trackUrls = tracksManager.getUrls();
 
-    if (!(name in trackUrls)) {
-      trackUrls[name] = [];
-    }
-    trackUrls[name].push(url);
+    if (!(trackName in trackUrls)) trackUrls[trackName] = [];
+    
+    trackUrls[trackName].push(url);
     tracksManager.saveUrls(trackUrls);
 
-    console.log(`Added ${url} to ${name}`);
-    msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `${await getTrackTitle(url)} added to ${name}`));
+    console.log(`Added ${url} to ${trackName}`);
+    msg.channel.send(messageFormatter.getBaseMessage().addField('Track added', `${await getTrackTitle(url)} added to ${trackName}`));
   },
   argHelp: '<track-name> <url>',
   aliases: ['a']
@@ -68,30 +68,31 @@ commander.addCommand(new Command({
 commander.addCommand(new Command({
   name: 'remove',
   description: 'removes the specified track from the list',
-  action: async (msg, name, index) => {
+  action: async (msg, trackName, index) => {
     const trackUrls = tracksManager.getUrls();
     let removedUrl;
 
-    if (name in trackUrls) {
+    if (trackName in trackUrls) {
       if (!index) {
-        msg.channel.send(messageFormatter.getBaseMessage().addField('Missing index: use one of those', (await Promise.all(trackUrls[name]
-          .map(async (url, i) => `${i+1} - ${await getTrackTitle(url)}`)))
+        msg.channel.send(messageFormatter.getBaseMessage().addField('Missing index: use one of those', (await Promise.all(trackUrls[trackName]
+          .map(async (url, i) => `${i} - ${await getTrackTitle(url)}`)))
           .join('\n')));
         return;
       }
 
-      trackUrls[name] = trackUrls[name].filter((url, i) => {
+      trackUrls[trackName] = trackUrls[trackName].filter((url, i) => {
         if (i != Number(index)) return true;
+
         removedUrl = url
         return false;
       });
-      if (trackUrls[name].length === 0) trackUrls[name] = undefined;
+      if (trackUrls[trackName].length === 0) trackUrls[trackName] = undefined;
       tracksManager.saveUrls(trackUrls);
     }
 
     if (removedUrl) {
-      console.log(`Removed ${removedUrl} from ${name}`);
-      msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${name}`));
+      console.log(`Removed ${removedUrl} from ${trackName}`);
+      msg.channel.send(messageFormatter.getBaseMessage().addField('Track removed', `${await getTrackTitle(removedUrl)}(${index}) removed from ${trackName}`));
     }
     else {
       msg.channel.send(messageFormatter.error('Couldn\'t find the specified track'))
@@ -109,11 +110,11 @@ commander.addCommand(new Command({
     if (index == undefined) index = Math.floor(Math.random() * Math.floor(trackUrls[trackName].length));
 
     if (trackName in trackUrls && index >= 0 && index < trackUrls[trackName].length) {
-      const trackUrl = trackUrls[trackName][index];
-      playTrack(msg.member.voice.channel, trackUrl);
+      const url = trackUrls[trackName][index];
+      playTrack(msg.member.voice.channel, url);
 
-      console.log(`Playing: ${index} - ${trackUrl} of ${trackName}`);
-      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(trackUrl)}`));
+      console.log(`Playing: ${index} - ${url} of ${trackName}`);
+      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(url)}`));
     }
     else {
       msg.channel.send(messageFormatter.error('Couldn\'t find the specified track!'));
@@ -129,6 +130,7 @@ commander.addCommand(new Command({
   action: () => {
     if (currentConnection) {
       currentConnection.dispatcher.pause();
+
       console.log('Paused track');
     }
   }
@@ -140,6 +142,7 @@ commander.addCommand(new Command({
   action: () => {
     if (currentConnection) {
       currentConnection.dispatcher.resume();
+
       console.log('Resumed track');
     }
   }
@@ -150,17 +153,19 @@ commander.addCommand(new Command({
   description: 'list the available tracks',
   action: async (msg, trackName) => {
     const trackUrls = tracksManager.getUrls();
+
     if (trackName in trackUrls) {
-      msg.channel.send(messageFormatter.getBaseMessage().addField(`Tracks for ${trackName}`, (await Promise.all(trackUrls[trackName]
-        .map(async (url, i) => `${i+1} - ${await getTrackTitle(url)}`)))
-        .join('\n')));
+      msg.channel.send(messageFormatter.getBaseMessage()
+        .addField(`Tracks for ${trackName}`, (await Promise.all(trackUrls[trackName]
+          .map(async (url, i) => `${i+1} - ${await getTrackTitle(url)}`)))
+          .join('\n')));
     }
     else {
       msg.channel.send(messageFormatter.getBaseMessage()
-      .addField('List of tracks', `\n${Object.entries(tracksManager.getUrls())
-        .map(([key, value]) => `${key} (${value.length})`)
-        .sort()
-        .join('\n')}`));
+        .addField('List of tracks', `\n${Object.entries(tracksManager.getUrls())
+          .map(([key, value]) => `${key} (${value.length})`)
+          .sort()
+          .join('\n')}`));
     }
   },
   argHelp: '[<track-name>]',
