@@ -155,7 +155,7 @@ commander.addCommand(new Command({
   name: 'pause',
   description: 'pause the player',
   action: () => {
-    if (currentConnection) {
+    if (currentConnection && currentConnection.dispatcher) {
       currentConnection.dispatcher.pause();
 
       console.log('Paused track');
@@ -167,7 +167,7 @@ commander.addCommand(new Command({
   name: 'resume',
   description: 'resume the player',
   action: () => {
-    if (currentConnection) {
+    if (currentConnection && currentConnection.dispatcher) {
       currentConnection.dispatcher.resume();
 
       console.log('Resumed track');
