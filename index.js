@@ -13,6 +13,7 @@ const client = new Discord.Client();
 const commander = new Commander('d.');
 
 let currentConnection = null;
+const playQueue = [];
 
 
 client.on('ready', () => {
@@ -109,23 +110,42 @@ commander.addCommand(new Command({
   description: 'play the specified track',
   action: async (msg, trackName, index) => {
     const trackUrls = tracksManager.getUrls();
+    let isContinuos = false;
 
     if (!trackName) {
       msg.channel.send(messageFormatter.error('No track was specified!'));
       return;
     }
 
-    if (index == undefined) index = Math.floor(Math.random() * Math.floor(trackUrls[trackName].length));
     if (trackName in trackUrls && index >= 0 && index < trackUrls[trackName].length) {
-      const url = trackUrls[trackName][index];
-      playTrack(msg.member.voice.channel, url);
-
-      console.log(`Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`);
-      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(url)}`));
+      playQueue.push([ index, trackUrls[trackName][index] ]);
+    }
+    else if (trackName in trackUrls && !index) {
+      playQueue.push(...trackUrls[trackName].map((url, i) => [i, url]));
+      for (let i = playQueue.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [playQueue[i], playQueue[j]] = [playQueue[j], playQueue[i]];
+      }
     }
     else {
       msg.channel.send(messageFormatter.error('Couldn\'t find the specified track!'));
+      return;
     }
+    
+    let url;
+    [index, url] = playQueue.shift();
+    await playTrack(msg.member.voice.channel, url);
+    
+    console.log(`Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`);
+    msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(url)}`));
+    
+    currentConnection.dispatcher.on('finish', async () => {
+      [index, url] = playQueue.shift();
+      await playTrack(msg.member.voice.channel, url);
+    
+      console.log(`Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`);
+      msg.channel.send(messageFormatter.getBaseMessage().addField('Playing', `${index} - ${await getTrackTitle(url)}`));
+    });
   },
   argHelp: '<track-name> [<index>]',
   aliases: ['p']
