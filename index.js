@@ -18,7 +18,7 @@ let playQueue = [];
 client.on("ready", () => {
   console.log(`Logged in as ${chalk.magenta(client.user.tag)}!`);
 
-  client.user.setActivity("d.help");
+  client.user.setActivity("d.help", { type: "LISTENING" });
 });
 
 client.on("message", (msg) => {
