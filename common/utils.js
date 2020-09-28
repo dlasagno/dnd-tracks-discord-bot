@@ -6,3 +6,11 @@ exports.getTrackTitle = async (url, linked = true) => {
 
   return trackTitle;
 };
+
+exports.playTrack = (connection, url) => {
+  connection.play(
+    ytdl(url, {
+      filter: "audioonly",
+    })
+  );
+};

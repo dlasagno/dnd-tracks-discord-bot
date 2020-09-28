@@ -1,7 +1,7 @@
 const { Command } = require("discord.js-commando");
-const tracksManager = require("../../src/tracks-manager");
-const messageFormatter = require("../../src/message-formatter");
-const { getTrackTitle } = require("../../src/utils");
+const tracksManager = require("../../common/tracks-manager");
+const messageFormatter = require("../../common/message-formatter");
+const { getTrackTitle } = require("../../common/utils");
 
 module.exports = class ListCommand extends Command {
   constructor(client) {

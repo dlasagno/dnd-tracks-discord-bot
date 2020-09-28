@@ -1,8 +1,22 @@
 require("dotenv").config();
 const { CommandoClient } = require("discord.js-commando");
-const ytdl = require("ytdl-core");
+const { Structures } = require("discord.js");
 const chalk = require("chalk");
 const path = require("path");
+
+Structures.extend(
+  "Guild",
+  (Guild) =>
+    class AudioGuild extends Guild {
+      constructor(client, data) {
+        super(client, data);
+        this.audioData = {
+          queue: [],
+          trackDispatcher: null,
+        };
+      }
+    }
+);
 
 const client = new CommandoClient({
   commandPrefix: "d.",
@@ -23,6 +37,15 @@ client.once("ready", () => {
   console.log(`Logged in as ${chalk.magenta(client.user.tag)}!`);
 
   client.user.setActivity("d.help", { type: "LISTENING" });
+});
+
+client.on("commandRun", ({ message }) => {
+  console.log();
+  console.log(
+    `${chalk.cyan(
+      new Date().toLocaleTimeString()
+    )} - Received command from ${chalk.magenta(msg.author.tag)}: ${msg.content}`
+  );
 });
 
 client.on("error", console.error);
