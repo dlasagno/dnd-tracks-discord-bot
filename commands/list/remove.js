@@ -4,7 +4,7 @@ const messageFormatter = require("../../src/message-formatter");
 const ytdl = require("ytdl-core");
 const chalk = require("chalk");
 
-module.exports = class AddCommand extends Command {
+module.exports = class RemoveCommand extends Command {
   constructor(client) {
     super(client, {
       name: "remove",
