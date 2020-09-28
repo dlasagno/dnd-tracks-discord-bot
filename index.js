@@ -44,7 +44,9 @@ client.on("commandRun", ({ message }) => {
   console.log(
     `${chalk.cyan(
       new Date().toLocaleTimeString()
-    )} - Received command from ${chalk.magenta(msg.author.tag)}: ${msg.content}`
+    )} - Received command from ${chalk.magenta(message.author.tag)}: ${
+      message.content
+    }`
   );
 });
 
