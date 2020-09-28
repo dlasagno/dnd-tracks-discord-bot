@@ -40,6 +40,8 @@ client.once("ready", () => {
 });
 
 client.on("commandRun", ({ message }) => {
+  if (!message) return;
+
   console.log();
   console.log(
     `${chalk.cyan(
