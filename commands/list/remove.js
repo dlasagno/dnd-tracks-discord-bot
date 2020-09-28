@@ -4,6 +4,13 @@ const messageFormatter = require("../../src/message-formatter");
 const ytdl = require("ytdl-core");
 const chalk = require("chalk");
 
+async function getTrackTitle(url, linked = true) {
+  let trackTitle = (await ytdl.getBasicInfo(url)).videoDetails.title;
+  if (linked) trackTitle = `[${trackTitle}](${url})`;
+
+  return trackTitle;
+}
+
 module.exports = class RemoveCommand extends Command {
   constructor(client) {
     super(client, {
