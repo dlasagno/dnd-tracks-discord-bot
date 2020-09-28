@@ -22,12 +22,12 @@ module.exports = class AddCommand extends Command {
       args: [
         {
           key: "trackName",
-          prompt: "The name of the track",
+          prompt: "What's the name of the track?",
           type: "string",
         },
         {
           key: "url",
-          prompt: "The youtube url of the track",
+          prompt: "What's the youtube url of the track?",
           type: "string",
           validate: (url) => {
             try {

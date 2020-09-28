@@ -22,12 +22,12 @@ module.exports = class RemoveCommand extends Command {
       args: [
         {
           key: "trackName",
-          prompt: "The name of the track",
+          prompt: "What's the name of the track?",
           type: "string",
         },
         {
           key: "index",
-          prompt: "The index of the track",
+          prompt: "What's the index of the track?",
           type: "integer",
           validate: (index) => index >= 0,
         },

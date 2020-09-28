@@ -21,7 +21,7 @@ module.exports = class ListCommand extends Command {
       args: [
         {
           key: "trackName",
-          prompt: "The name of the track",
+          prompt: "What's the name of the track?",
           type: "string",
           default: "",
         },
