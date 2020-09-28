@@ -1,14 +1,7 @@
 const { Command } = require("discord.js-commando");
 const tracksManager = require("../../src/tracks-manager");
 const messageFormatter = require("../../src/message-formatter");
-const ytdl = require("ytdl-core");
-
-async function getTrackTitle(url, linked = true) {
-  let trackTitle = (await ytdl.getBasicInfo(url)).videoDetails.title;
-  if (linked) trackTitle = `[${trackTitle}](${url})`;
-
-  return trackTitle;
-}
+const { getTrackTitle } = require("../../src/utils");
 
 module.exports = class ListCommand extends Command {
   constructor(client) {

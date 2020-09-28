@@ -1,15 +1,8 @@
 const { Command } = require("discord.js-commando");
 const tracksManager = require("../../src/tracks-manager");
 const messageFormatter = require("../../src/message-formatter");
-const ytdl = require("ytdl-core");
+const { getTrackTitle } = require("../../src/utils");
 const chalk = require("chalk");
-
-async function getTrackTitle(url, linked = true) {
-  let trackTitle = (await ytdl.getBasicInfo(url)).videoDetails.title;
-  if (linked) trackTitle = `[${trackTitle}](${url})`;
-
-  return trackTitle;
-}
 
 module.exports = class RemoveCommand extends Command {
   constructor(client) {
@@ -24,6 +17,7 @@ module.exports = class RemoveCommand extends Command {
           key: "trackName",
           prompt: "What's the name of the track?",
           type: "string",
+          validate: (trackName) => trackName in tracksManager.getUrls(),
         },
         {
           key: "index",
@@ -43,33 +37,31 @@ module.exports = class RemoveCommand extends Command {
     const trackUrls = tracksManager.getUrls();
     let removedUrl;
 
-    if (trackName in trackUrls) {
-      trackUrls[trackName] = trackUrls[trackName].filter((url, i) => {
-        if (i != Number(index)) return true;
-
-        removedUrl = url;
-        return false;
-      });
-      if (trackUrls[trackName].length === 0) trackUrls[trackName] = undefined;
-      tracksManager.saveUrls(trackUrls);
-    }
-
-    if (removedUrl) {
-      console.log(
-        `Removed ${chalk.blue(removedUrl)} from ${chalk.magenta(trackName)}`
-      );
-      message.embed(
-        messageFormatter
-          .getBaseMessage()
-          .addField(
-            "Track removed",
-            `${await getTrackTitle(
-              removedUrl
-            )}(${index}) removed from ${trackName}`
-          )
-      );
-    } else {
+    if (index >= trackUrls[trackName].length) {
       message.reply("Couldn't find the specified track");
+      return;
     }
+
+    trackUrls[trackName] = trackUrls[trackName].filter((url, i) => {
+      if (i != Number(index)) return true;
+
+      removedUrl = url;
+      return false;
+    });
+    tracksManager.saveUrls(trackUrls);
+
+    console.log(
+      `Removed ${chalk.blue(removedUrl)} from ${chalk.magenta(trackName)}`
+    );
+    message.embed(
+      messageFormatter
+        .getBaseMessage()
+        .addField(
+          "Track removed",
+          `${await getTrackTitle(
+            removedUrl
+          )}(${index}) removed from ${trackName}`
+        )
+    );
   }
 };
