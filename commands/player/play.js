@@ -76,8 +76,7 @@ module.exports = class PlayCommand extends Command {
     };
 
     connection.dispatcher.on("finish", async function playNext() {
-      console.log(queue);
-      if (queue.length === 0) return console.log("doesn't work!");
+      if (queue.length === 0) return;
 
       [index, url] = queue.shift();
       queue.push([index, url]);
