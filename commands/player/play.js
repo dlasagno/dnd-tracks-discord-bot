@@ -52,14 +52,21 @@ module.exports = class PlayCommand extends Command {
 
     let url;
     [index, url] = queue.shift();
+    queue.push([index, url]);
 
     const connection = await message.member.voice.channel.join();
     console.log(
       `Joined voice channel: ${chalk.magenta(connection.channel.name)}`
     );
-    playTrack(connection, url);
+
+    message.guild.audioData.dispatcher = playTrack(connection, url);
     console.log(
       `Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`
+    );
+    message.channel.send(
+      messageFormatter
+        .getBaseMessage()
+        .addField("Playing", `${index} - ${await getTrackTitle(url)}`)
     );
 
     message.guild.audioData = {
@@ -68,15 +75,15 @@ module.exports = class PlayCommand extends Command {
       trackDispatcher: connection.dispatcher,
     };
 
-    message.channel.send(
-      messageFormatter
-        .getBaseMessage()
-        .addField("Playing", `${index} - ${await getTrackTitle(url)}`)
-    );
+    connection.dispatcher.on("finish", async function playNext() {
+      console.log(queue);
+      if (queue.length === 0) return console.log("doesn't work!");
 
-    connection.dispatcher.on("finish", async () => {
       [index, url] = queue.shift();
-      await playTrack(connection, url);
+      queue.push([index, url]);
+
+      message.guild.audioData.trackDispatcher = playTrack(connection, url);
+      message.guild.audioData.trackDispatcher.on("finish", playNext);
 
       console.log(
         `Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`
