@@ -1,12 +1,13 @@
-const { Command } = require("discord.js-commando");
-const tracksManager = require("../../common/tracks-manager");
-const messageFormatter = require("../../common/message-formatter");
-const { getTrackTitle, playTrack } = require("../../common/utils");
-const ytdl = require("ytdl-core");
-const chalk = require("chalk");
+import { Command, CommandoClient, CommandoMessage } from "discord.js-commando";
+import * as tracksManager from "../../common/tracks-manager";
+import * as messageFormatter from "../../common/message-formatter";
+import { getTrackTitle, playTrack } from "../../common/utils";
+import ytdl from "ytdl-core";
+import chalk from "chalk";
+import { PlayerProvider } from "../..";
 
 module.exports = class PlayCommand extends Command {
-  constructor(client) {
+  constructor(client: CommandoClient) {
     super(client, {
       name: "play",
       aliases: ["p"],
@@ -18,7 +19,7 @@ module.exports = class PlayCommand extends Command {
           key: "trackName",
           prompt: "What's the name of the track?",
           type: "string",
-          validate: (trackName) => trackName in tracksManager.getUrls(),
+          validate: (trackName: string) => trackName in tracksManager.getUrls(),
         },
         {
           key: "index",
@@ -31,18 +32,22 @@ module.exports = class PlayCommand extends Command {
     });
   }
 
-  async run(message, { trackName, index }) {
+  async run(
+    message: CommandoMessage,
+    { trackName, index }: { trackName: string; index: number }
+  ) {
+    const playerProvider = (message.guild as unknown) as PlayerProvider;
     const trackUrls = tracksManager.getUrls();
-    const queue = [];
-    message.guild.audioData.queue;
+    const queue: Array<[index: number, url: string]> = [];
 
     if (index >= 0 && index < trackUrls[trackName].length) {
       queue.push([index, trackUrls[trackName][index]]);
     } else if (index < 0) {
-      queue.push(...trackUrls[trackName].map((url, i) => [i, url]));
+      queue.push(
+        ...trackUrls[trackName].map((url, i): [number, string] => [i, url])
+      );
     } else {
-      message.reply("Couldn't find the specified track");
-      return;
+      return message.reply("Couldn't find the specified track");
     }
 
     for (let i = queue.length - 1; i > 0; i--) {
@@ -50,16 +55,18 @@ module.exports = class PlayCommand extends Command {
       [queue[i], queue[j]] = [queue[j], queue[i]];
     }
 
-    let url;
-    [index, url] = queue.shift();
+    let url: string;
+    [index, url] = queue.shift() as [number, string];
     queue.push([index, url]);
 
-    const connection = await message.member.voice.channel.join();
-    console.log(
-      `Joined voice channel: ${chalk.magenta(connection.channel.name)}`
-    );
+    const connection = await message.member.voice.channel?.join();
+    if (connection)
+      console.log(
+        `Joined voice channel: ${chalk.magenta(connection.channel.name)}`
+      );
+    else return message.reply("Couldn't connect to the voice channel");
 
-    message.guild.audioData.dispatcher = playTrack(connection, url);
+    playerProvider.audioData.trackDispatcher = playTrack(connection, url);
     console.log(
       `Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`
     );
@@ -69,8 +76,8 @@ module.exports = class PlayCommand extends Command {
         .addField("Playing", `${index} - ${await getTrackTitle(url)}`)
     );
 
-    message.guild.audioData = {
-      ...message.guild.audioData,
+    playerProvider.audioData = {
+      ...playerProvider.audioData,
       queue,
       trackDispatcher: connection.dispatcher,
     };
@@ -78,11 +85,11 @@ module.exports = class PlayCommand extends Command {
     connection.dispatcher.on("finish", async function playNext() {
       if (queue.length === 0) return;
 
-      [index, url] = queue.shift();
+      [index, url] = queue.shift() as [number, string];
       queue.push([index, url]);
 
-      message.guild.audioData.trackDispatcher = playTrack(connection, url);
-      message.guild.audioData.trackDispatcher.on("finish", playNext);
+      playerProvider.audioData.trackDispatcher = playTrack(connection, url);
+      playerProvider.audioData.trackDispatcher.on("finish", playNext);
 
       console.log(
         `Playing: ${index} - ${chalk.blue(url)} of ${chalk.magenta(trackName)}`
@@ -93,5 +100,7 @@ module.exports = class PlayCommand extends Command {
           .addField("Playing", `${index} - ${await getTrackTitle(url)}`)
       );
     });
+
+    return message.message;
   }
 };

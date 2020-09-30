@@ -1,12 +1,12 @@
-const { Command } = require("discord.js-commando");
-const tracksManager = require("../../common/tracks-manager");
-const messageFormatter = require("../../common/message-formatter");
-const { getTrackTitle } = require("../../common/utils");
-const ytdl = require("ytdl-core");
-const chalk = require("chalk");
+import { Command, CommandoClient, CommandoMessage } from "discord.js-commando";
+import * as tracksManager from "../../common/tracks-manager";
+import * as messageFormatter from "../../common/message-formatter";
+import { getTrackTitle } from "../../common/utils";
+import ytdl from "ytdl-core";
+import chalk from "chalk";
 
 module.exports = class AddCommand extends Command {
-  constructor(client) {
+  constructor(client: CommandoClient) {
     super(client, {
       name: "add",
       aliases: ["a"],
@@ -23,14 +23,15 @@ module.exports = class AddCommand extends Command {
           key: "url",
           prompt: "What's the youtube url of the track?",
           type: "string",
-          validate: (url) => {
+          validate: (url: string) => {
             try {
               return Boolean(ytdl.validateID(ytdl.getVideoID(url)));
             } catch {
               return false;
             }
           },
-          parse: (url) => `https://youtube.com/watch?v=${ytdl.getVideoID(url)}`,
+          parse: (url: string) =>
+            `https://youtube.com/watch?v=${ytdl.getVideoID(url)}`,
         },
       ],
       throttling: {
@@ -40,7 +41,10 @@ module.exports = class AddCommand extends Command {
     });
   }
 
-  async run(message, { trackName, url }) {
+  async run(
+    message: CommandoMessage,
+    { trackName, url }: { trackName: string; url: string }
+  ) {
     const trackUrls = tracksManager.getUrls();
 
     if (!(trackName in trackUrls)) trackUrls[trackName] = [];
@@ -57,5 +61,7 @@ module.exports = class AddCommand extends Command {
           `${await getTrackTitle(url)} added to ${trackName}`
         )
     );
+
+    return message.message;
   }
 };

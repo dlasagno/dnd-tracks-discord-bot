@@ -1,7 +1,10 @@
+import { CommandoClient, CommandoMessage } from "discord.js-commando";
+import { PlayerProvider } from "../..";
+
 const { Command } = require("discord.js-commando");
 
 module.exports = class ResumeCommand extends Command {
-  constructor(client) {
+  constructor(client: CommandoClient) {
     super(client, {
       name: "resume",
       group: "player",
@@ -10,8 +13,9 @@ module.exports = class ResumeCommand extends Command {
     });
   }
 
-  run(message) {
-    const dispatcher = message.guild.audioData.trackDispatcher;
+  run(message: CommandoMessage) {
+    const dispatcher = ((message.guild as unknown) as PlayerProvider).audioData
+      .trackDispatcher;
     if (dispatcher) dispatcher.resume();
   }
 };

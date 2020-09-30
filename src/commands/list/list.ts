@@ -1,10 +1,10 @@
-const { Command } = require("discord.js-commando");
-const tracksManager = require("../../common/tracks-manager");
-const messageFormatter = require("../../common/message-formatter");
-const { getTrackTitle } = require("../../common/utils");
+import { Command, CommandoClient, CommandoMessage } from "discord.js-commando";
+import * as tracksManager from "../../common/tracks-manager";
+import * as messageFormatter from "../../common/message-formatter";
+import { getTrackTitle } from "../../common/utils";
 
 module.exports = class ListCommand extends Command {
-  constructor(client) {
+  constructor(client: CommandoClient) {
     super(client, {
       name: "list",
       aliases: ["ls"],
@@ -26,7 +26,7 @@ module.exports = class ListCommand extends Command {
     });
   }
 
-  async run(message, { trackName }) {
+  async run(message: CommandoMessage, { trackName }: { trackName: string }) {
     const trackUrls = tracksManager.getUrls();
 
     if (trackName in trackUrls) {
@@ -55,5 +55,7 @@ module.exports = class ListCommand extends Command {
         )
       );
     }
+
+    return message.message;
   }
 };

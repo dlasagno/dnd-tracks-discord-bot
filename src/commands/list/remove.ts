@@ -1,11 +1,11 @@
-const { Command } = require("discord.js-commando");
-const tracksManager = require("../../common/tracks-manager");
-const messageFormatter = require("../../common/message-formatter");
-const { getTrackTitle } = require("../../common/utils");
-const chalk = require("chalk");
+import { Command, CommandoClient, CommandoMessage } from "discord.js-commando";
+import * as tracksManager from "../../common/tracks-manager";
+import * as messageFormatter from "../../common/message-formatter";
+import { getTrackTitle } from "../../common/utils";
+import chalk from "chalk";
 
 module.exports = class RemoveCommand extends Command {
-  constructor(client) {
+  constructor(client: CommandoClient) {
     super(client, {
       name: "remove",
       aliases: ["r"],
@@ -17,13 +17,13 @@ module.exports = class RemoveCommand extends Command {
           key: "trackName",
           prompt: "What's the name of the track?",
           type: "string",
-          validate: (trackName) => trackName in tracksManager.getUrls(),
+          validate: (trackName: string) => trackName in tracksManager.getUrls(),
         },
         {
           key: "index",
           prompt: "What's the index of the track?",
           type: "integer",
-          validate: (index) => index >= 0,
+          validate: (index: number) => index >= 0,
         },
       ],
       throttling: {
@@ -33,13 +33,15 @@ module.exports = class RemoveCommand extends Command {
     });
   }
 
-  async run(message, { trackName, index }) {
+  async run(
+    message: CommandoMessage,
+    { trackName, index }: { trackName: string; index: number }
+  ) {
     const trackUrls = tracksManager.getUrls();
-    let removedUrl;
+    let removedUrl = "";
 
     if (index >= trackUrls[trackName].length) {
-      message.reply("Couldn't find the specified track");
-      return;
+      return message.reply("Couldn't find the specified track");
     }
 
     trackUrls[trackName] = trackUrls[trackName].filter((url, i) => {
@@ -63,5 +65,7 @@ module.exports = class RemoveCommand extends Command {
           )}(${index}) removed from ${trackName}`
         )
     );
+
+    return message.message;
   }
 };
